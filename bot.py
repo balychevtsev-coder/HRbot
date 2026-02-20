@@ -13,11 +13,13 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, BufferedInputFile
 from dotenv import load_dotenv
 import openai
+import docx
 
 # Импорты модулей
 import database as db
 from parse_hh import extract_vacancy_data, extract_resume_data, get_html
 from pdf_resume_parser import extract_resume_data_from_pdf
+from docx_resume_parser import extract_resume_data_from_docx
 
 load_dotenv()
 
@@ -207,7 +209,7 @@ def vacancy_type_kb():
 
 def resume_type_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📎 PDF файл", callback_data="res_pdf")],
+        [InlineKeyboardButton(text="📎 Файл (PDF / Word)", callback_data="res_pdf")],
         [InlineKeyboardButton(text="📝 Текст", callback_data="res_text")],
         [InlineKeyboardButton(text="🔗 HH.ru", callback_data="res_hh")]
     ])
@@ -352,18 +354,52 @@ async def handle_resume_input(message: types.Message, state: FSMContext):
     method = data.get("res_method")
     try:
         resume_text, resume_url = "", "Загружено вручную"
-        if method == "res_pdf" and message.document:
+        
+        # Обработка файлов (PDF или DOCX)
+        if message.document:
+            file_name = message.document.file_name.lower()
             file_content = await bot.download(message.document)
-            resume_text = extract_resume_data_from_pdf(file_content.read(), client, OCR_SYSTEM_PROMPT)
+            file_bytes = file_content.read()
+
+            if file_name.endswith('.pdf'):
+                # Ваш существующий парсер для PDF
+                resume_text = extract_resume_data_from_pdf(file_bytes, client, OCR_SYSTEM_PROMPT)
+            
+            elif file_name.endswith('.docx') or file_name.endswith('.doc'):
+                # Читаем текст из Word
+                from docx_resume_parser import extract_resume_data_from_docx
+                raw_docx_text = extract_resume_data_from_docx(file_bytes)
+                
+                # Просим ИИ привести "сырой" текст из Word к нужному нам формату
+                # Это гарантирует, что в тексте появятся метки # ФИО и **Телефон**
+                res = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": OCR_SYSTEM_PROMPT},
+                        {"role": "user", "content": raw_docx_text}
+                    ]
+                )
+                resume_text = res.choices[0].message.content
+            else:
+                await message.answer("❌ Формат не поддерживается. Пришлите PDF или DOCX.")
+                return
+
         elif method == "res_text":
             resume_text = message.text
+        
         elif method == "res_hh":
             resume_url = message.text
-            resume_text = extract_resume_data(resume_url) # Авторизованный парсинг
-        
-        await state.update_data(resume_text=resume_text, resume_url=resume_url)
-        await message.answer("✅ Резюме обработано!", reply_markup=main_menu_kb())
-    except Exception as e: await message.answer(f"❌ Ошибка: {e}")
+            resume_text = extract_resume_data(resume_url)
+
+        if resume_text:
+            await state.update_data(resume_text=resume_text, resume_url=resume_url)
+            await message.answer("✅ Резюме (Word/PDF) успешно обработано!", reply_markup=main_menu_kb())
+        else:
+            await message.answer("⚠️ Не удалось извлечь данные. Попробуйте другой файл.")
+
+    except Exception as e: 
+        await message.answer(f"❌ Ошибка при обработке: {e}")
+    
     await state.set_state(None)
 
 # --- Анализ и база ---
