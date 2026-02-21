@@ -192,7 +192,6 @@ REVERSE_VACANCY_PROMPT = """
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="1️⃣ Установить вакансию", callback_data="set_vacancy")],
-        [InlineKeyboardButton(text="🪄 Вакансия из резюме (NEW)", callback_data="reverse_vac")],
         [InlineKeyboardButton(text="2️⃣ Загрузить резюме", callback_data="set_resume")],
         [InlineKeyboardButton(text="📊 Анализ и сохранение", callback_data="run_analysis")],
         [InlineKeyboardButton(text="📋 Список кандидатов", callback_data="view_candidates")],
@@ -212,6 +211,7 @@ def resume_type_kb():
         [InlineKeyboardButton(text="📎 Файл (PDF / Word)", callback_data="res_pdf")],
         [InlineKeyboardButton(text="📝 Текст", callback_data="res_text")],
         [InlineKeyboardButton(text="🔗 HH.ru", callback_data="res_hh")]
+        [InlineKeyboardButton(text="🪄 Вакансия из резюме", callback_data="reverse_vac")],
     ])
 
 # --- Вспомогательные функции ---
