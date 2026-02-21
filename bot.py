@@ -203,15 +203,15 @@ def vacancy_type_kb():
         [InlineKeyboardButton(text="✍ По названию", callback_data="vac_gen")],
         [InlineKeyboardButton(text="📄 Текст", callback_data="vac_text")],
         [InlineKeyboardButton(text="🔗 HH.ru", callback_data="vac_hh")],
-        [InlineKeyboardButton(text="📁 Из базы", callback_data="vac_db")]
+        [InlineKeyboardButton(text="📁 Из базы", callback_data="vac_db")],
+        [InlineKeyboardButton(text="🪄 Вакансия из резюме", callback_data="reverse_vac")]
     ])
 
 def resume_type_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📎 Файл (PDF / Word)", callback_data="res_pdf")],
         [InlineKeyboardButton(text="📝 Текст", callback_data="res_text")],
-        [InlineKeyboardButton(text="🔗 HH.ru", callback_data="res_hh")],
-        [InlineKeyboardButton(text="🪄 Вакансия из резюме", callback_data="reverse_vac")]
+        [InlineKeyboardButton(text="🔗 HH.ru", callback_data="res_hh")]
     ])
 
 # --- Вспомогательные функции ---
