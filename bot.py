@@ -210,8 +210,8 @@ def resume_type_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📎 Файл (PDF / Word)", callback_data="res_pdf")],
         [InlineKeyboardButton(text="📝 Текст", callback_data="res_text")],
-        [InlineKeyboardButton(text="🔗 HH.ru", callback_data="res_hh")]
-        [InlineKeyboardButton(text="🪄 Вакансия из резюме", callback_data="reverse_vac")],
+        [InlineKeyboardButton(text="🔗 HH.ru", callback_data="res_hh")],
+        [InlineKeyboardButton(text="🪄 Вакансия из резюме", callback_data="reverse_vac")]
     ])
 
 # --- Вспомогательные функции ---
